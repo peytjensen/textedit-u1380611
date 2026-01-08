@@ -7,3 +7,4 @@ For this first release, I successfully implemented all the basics such as text e
 <p>
 For testing I have an AMP-generated testing suite that currently includes 90 tests. These test various functions such as file read/write, UTF-8 encoding, errors, document modeling, word wrap, etc. I plan on implementing more tests as I continue with the project, so far the tests AMP has made look correct and I haven't felt the need to edit them. AMP also does surprisingly well with modularity on it's own, and many components such as document handling, the editing pane, the file handler, and more, have all been split into their own files without the need of my instruction. Moving forward, as mentioned above, I have started on a tab and split view system that I will refine in the next release along with adding new features. 
 </p>
+<img width="275" height="241" alt="image" src="https://github.com/user-attachments/assets/511ae3d2-a5c9-4454-8663-606a08d3d907" />
