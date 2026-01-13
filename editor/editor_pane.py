@@ -13,6 +13,7 @@ from PySide6.QtGui import QTextCursor
 from editor.document import Document, CursorPosition
 from editor.tab_bar import EditorTabBar
 from editor.file_handler import FileHandler
+from editor.line_number_editor import LineNumberedEditor
 
 
 class EditorPane(QWidget):
@@ -48,8 +49,8 @@ class EditorPane(QWidget):
         self._tab_bar.setVisible(True)
         layout.addWidget(self._tab_bar)
         
-        self._editor = QPlainTextEdit(self)
-        self._editor.setLineWrapMode(QPlainTextEdit.LineWrapMode.WidgetWidth)
+        self._editor = LineNumberedEditor(self)
+        self._editor.setLineWrapMode(LineNumberedEditor.LineWrapMode.WidgetWidth)
         layout.addWidget(self._editor)
         
         self._editor.textChanged.connect(self._on_text_changed)
@@ -192,9 +193,13 @@ class EditorPane(QWidget):
     def set_word_wrap(self, enabled: bool):
         """Toggle word wrap on the editor."""
         if enabled:
-            self._editor.setLineWrapMode(QPlainTextEdit.LineWrapMode.WidgetWidth)
+            self._editor.setLineWrapMode(LineNumberedEditor.LineWrapMode.WidgetWidth)
         else:
-            self._editor.setLineWrapMode(QPlainTextEdit.LineWrapMode.NoWrap)
+            self._editor.setLineWrapMode(LineNumberedEditor.LineWrapMode.NoWrap)
+    
+    def set_line_number_colors(self, bg: str, text: str, current_line: str, current_line_bg: str):
+        """Set colors for the line number area."""
+        self._editor.set_line_number_colors(bg, text, current_line, current_line_bg)
     
     def _save_current_state(self):
         """Save current editor state to the active document."""

@@ -40,6 +40,7 @@
 | `editor/split_container.py` | `tests/test_tabs.py` |
 | `editor/tab_bar.py` | `tests/test_tab_bar.py` |
 | `editor/theme_manager.py` | `tests/test_theme.py` |
+| `editor/line_number_editor.py` | `tests/test_line_numbers.py` |
 
 ## Testing Conventions
 

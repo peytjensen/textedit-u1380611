@@ -140,6 +140,11 @@ class SplitContainer(QWidget):
         for pane in self._panes:
             pane.set_word_wrap(enabled)
     
+    def set_line_number_colors(self, bg: str, text: str, current_line: str, current_line_bg: str):
+        """Set line number colors on all panes."""
+        for pane in self._panes:
+            pane.set_line_number_colors(bg, text, current_line, current_line_bg)
+    
     def create_split(self, document: Document, edge: str) -> bool:
         """
         Create a split and move a document to the new pane.

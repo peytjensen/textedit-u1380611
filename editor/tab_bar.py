@@ -4,9 +4,9 @@ Custom Tab Bar with Drag Support
 Handles tab reordering and emits signals for split/merge operations.
 """
 
-from PySide6.QtWidgets import QTabBar, QToolButton, QStylePainter, QStyleOptionTab, QStyle
-from PySide6.QtCore import Signal, Qt, QPoint, QMimeData, QTimer
-from PySide6.QtGui import QDrag, QMouseEvent, QDragEnterEvent, QDragMoveEvent, QDropEvent, QColor
+from PySide6.QtWidgets import QTabBar, QToolButton, QStylePainter, QStyleOptionTab, QStyle, QRubberBand
+from PySide6.QtCore import Signal, Qt, QPoint, QMimeData, QTimer, QSize
+from PySide6.QtGui import QDrag, QMouseEvent, QDragEnterEvent, QDragMoveEvent, QDropEvent, QColor, QPixmap
 
 
 class EditorTabBar(QTabBar):
@@ -39,6 +39,9 @@ class EditorTabBar(QTabBar):
         self.setDocumentMode(True)
         
         self._modified_tabs: set[int] = set()
+        
+        self._drop_indicator = QRubberBand(QRubberBand.Shape.Line, self)
+        self._drop_indicator.setStyleSheet("background-color: #58a6ff;")
         
         self._setup_new_tab_button()
     
@@ -171,6 +174,12 @@ class EditorTabBar(QTabBar):
         mime_data.setData(self.MIME_TYPE, str(self._drag_tab_index).encode())
         drag.setMimeData(mime_data)
         
+        tab_rect = self.tabRect(self._drag_tab_index)
+        pixmap = QPixmap(tab_rect.size())
+        pixmap.fill(QColor("#2d2d2d"))
+        drag.setPixmap(pixmap)
+        drag.setHotSpot(QPoint(pixmap.width() // 2, pixmap.height() // 2))
+        
         self.external_drag_started.emit(self._drag_tab_index, self.mapToGlobal(event.pos()))
         
         drag.exec(Qt.DropAction.MoveAction)
@@ -195,11 +204,36 @@ class EditorTabBar(QTabBar):
         """Handle drag movement over this tab bar."""
         if event.mimeData().hasFormat(self.MIME_TYPE):
             event.acceptProposedAction()
+            self._show_drop_indicator(event.position().toPoint())
         else:
             event.ignore()
+            self._drop_indicator.hide()
+    
+    def dragLeaveEvent(self, event):
+        """Hide drop indicator when drag leaves."""
+        self._drop_indicator.hide()
+        super().dragLeaveEvent(event)
+    
+    def _show_drop_indicator(self, pos: QPoint):
+        """Show drop indicator at the appropriate position."""
+        drop_index = self.get_drop_index(pos)
+        
+        if drop_index < self.count():
+            rect = self.tabRect(drop_index)
+            x = rect.left()
+        elif self.count() > 0:
+            rect = self.tabRect(self.count() - 1)
+            x = rect.right()
+        else:
+            x = 0
+        
+        self._drop_indicator.setGeometry(x - 2, 0, 4, self.height())
+        self._drop_indicator.show()
     
     def dropEvent(self, event: QDropEvent):
         """Handle drop from another tab bar - emit signal for parent to handle."""
+        self._drop_indicator.hide()
+        
         if not event.mimeData().hasFormat(self.MIME_TYPE):
             event.ignore()
             return

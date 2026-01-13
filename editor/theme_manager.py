@@ -1046,3 +1046,33 @@ class ThemeManager:
             self.apply_theme(Theme.LIGHT)
         else:
             self.apply_theme(Theme.DARK)
+    
+    def get_line_number_colors(self) -> dict:
+        """Get line number colors for the current theme."""
+        colors = {
+            Theme.DARK: {
+                "bg": "#1e1e1e",
+                "text": "#858585",
+                "current_line": "#c6c6c6",
+                "current_line_bg": "#282828",
+            },
+            Theme.LIGHT: {
+                "bg": "#f3f3f3",
+                "text": "#999999",
+                "current_line": "#333333",
+                "current_line_bg": "#e8e8e8",
+            },
+            Theme.AQUAMARINE: {
+                "bg": "#1a2f2f",
+                "text": "#5a8a8a",
+                "current_line": "#40e0d0",
+                "current_line_bg": "#243d3d",
+            },
+            Theme.MIDNIGHT_BLUE: {
+                "bg": "#0d1117",
+                "text": "#6e7681",
+                "current_line": "#c9d1d9",
+                "current_line_bg": "#161b22",
+            },
+        }
+        return colors.get(self._current_theme, colors[Theme.DARK])

@@ -30,6 +30,7 @@ class MainWindow(QMainWindow):
         
         self._setup_ui()
         self._theme_manager.apply_theme(Theme.MIDNIGHT_BLUE)
+        self._apply_line_number_colors()
         self._setup_menus()
         self._setup_status_bar()
         self._connect_signals()
@@ -216,6 +217,13 @@ class MainWindow(QMainWindow):
     
     def _get_active_editor(self):
         """Get the currently active editor widget."""
+        from PySide6.QtWidgets import QApplication
+        from editor.line_number_editor import LineNumberedEditor
+        
+        focused = QApplication.focusWidget()
+        if isinstance(focused, LineNumberedEditor):
+            return focused
+        
         pane = self._split_container.active_pane
         if pane:
             return pane.editor
@@ -516,10 +524,21 @@ class MainWindow(QMainWindow):
     def _on_theme_changed(self, theme: Theme):
         """Handle theme selection."""
         self._theme_manager.apply_theme(theme)
+        self._apply_line_number_colors()
         self._dark_theme_action.setChecked(theme == Theme.DARK)
         self._light_theme_action.setChecked(theme == Theme.LIGHT)
         self._aquamarine_theme_action.setChecked(theme == Theme.AQUAMARINE)
         self._midnight_blue_theme_action.setChecked(theme == Theme.MIDNIGHT_BLUE)
+    
+    def _apply_line_number_colors(self):
+        """Apply line number colors based on current theme."""
+        colors = self._theme_manager.get_line_number_colors()
+        self._split_container.set_line_number_colors(
+            colors["bg"],
+            colors["text"],
+            colors["current_line"],
+            colors["current_line_bg"]
+        )
     
     def _on_swap_panes(self):
         """Handle View > Swap Split Panes."""
