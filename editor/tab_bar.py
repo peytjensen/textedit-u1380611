@@ -4,9 +4,9 @@ Custom Tab Bar with Drag Support
 Handles tab reordering and emits signals for split/merge operations.
 """
 
-from PySide6.QtWidgets import QTabBar, QToolButton
+from PySide6.QtWidgets import QTabBar, QToolButton, QStylePainter, QStyleOptionTab, QStyle
 from PySide6.QtCore import Signal, Qt, QPoint, QMimeData, QTimer
-from PySide6.QtGui import QDrag, QMouseEvent, QDragEnterEvent, QDragMoveEvent, QDropEvent
+from PySide6.QtGui import QDrag, QMouseEvent, QDragEnterEvent, QDragMoveEvent, QDropEvent, QColor
 
 
 class EditorTabBar(QTabBar):
@@ -32,15 +32,81 @@ class EditorTabBar(QTabBar):
         self._drag_tab_index: int = -1
         
         self.setMovable(True)
-        self.setTabsClosable(True)
+        self.setTabsClosable(False)
         self.setAcceptDrops(True)
         self.setElideMode(Qt.TextElideMode.ElideRight)
         self.setExpanding(False)
         self.setDocumentMode(True)
         
-        self.tabCloseRequested.connect(self._on_tab_close_requested)
+        self._modified_tabs: set[int] = set()
         
         self._setup_new_tab_button()
+    
+    def setTabModified(self, index: int, modified: bool):
+        """Mark a tab as modified or unmodified."""
+        if modified:
+            self._modified_tabs.add(index)
+        else:
+            self._modified_tabs.discard(index)
+        self.update()
+    
+    def tabInserted(self, index: int):
+        """Handle tab insertion - add custom close button."""
+        super().tabInserted(index)
+        QTimer.singleShot(0, self._position_new_tab_button)
+        self._add_close_button(index)
+    
+    def _add_close_button(self, index: int):
+        """Add a custom close button to the tab."""
+        close_btn = QToolButton(self)
+        close_btn.setText("×")
+        close_btn.setFixedSize(18, 18)
+        close_btn.setStyleSheet("""
+            QToolButton {
+                background: transparent;
+                border: none;
+                font-size: 16px;
+                font-weight: bold;
+                color: #808080;
+                padding: 0px;
+                margin: 0px;
+            }
+            QToolButton:hover {
+                background-color: #c42b1c;
+                color: white;
+                border-radius: 4px;
+            }
+        """)
+        close_btn.clicked.connect(self._on_close_button_clicked)
+        self.setTabButton(index, QTabBar.ButtonPosition.RightSide, close_btn)
+    
+    def _on_close_button_clicked(self):
+        """Handle close button click."""
+        sender = self.sender()
+        for i in range(self.count()):
+            btn = self.tabButton(i, QTabBar.ButtonPosition.RightSide)
+            if btn is sender:
+                self.tab_close_requested.emit(i)
+                return
+
+    
+    def paintEvent(self, event):
+        """Custom paint to render blue dot for modified tabs."""
+        painter = QStylePainter(self)
+        
+        for i in range(self.count()):
+            opt = QStyleOptionTab()
+            self.initStyleOption(opt, i)
+            painter.drawControl(QStyle.ControlElement.CE_TabBarTab, opt)
+            
+            if i in self._modified_tabs:
+                rect = self.tabRect(i)
+                dot_size = 8
+                x = rect.left() + 8
+                y = rect.center().y() - dot_size // 2
+                painter.setBrush(QColor("#0078d4"))
+                painter.setPen(Qt.PenStyle.NoPen)
+                painter.drawEllipse(x, y, dot_size, dot_size)
     
     def _setup_new_tab_button(self):
         """Add a '+' button at the end of the tab bar."""
@@ -66,11 +132,6 @@ class EditorTabBar(QTabBar):
         """Handle resize to reposition the '+' button."""
         super().resizeEvent(event)
         self._position_new_tab_button()
-    
-    def tabInserted(self, index: int):
-        """Handle tab insertion."""
-        super().tabInserted(index)
-        QTimer.singleShot(0, self._position_new_tab_button)
     
     def tabRemoved(self, index: int):
         """Handle tab removal."""
@@ -157,7 +218,3 @@ class EditorTabBar(QTabBar):
             if pos.x() < rect.center().x():
                 return i
         return self.count()
-    
-    def _on_tab_close_requested(self, index: int):
-        """Forward tab close request."""
-        self.tab_close_requested.emit(index)

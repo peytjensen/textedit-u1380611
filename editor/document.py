@@ -83,11 +83,8 @@ class Document:
     
     @property
     def display_name(self) -> str:
-        """Get display name with modification indicator."""
-        name = self.file_name
-        if self._is_modified:
-            return f"{name}*"
-        return name
+        """Get display name (modification shown via blue dot in tab bar)."""
+        return self.file_name
     
     @property
     def is_modified(self) -> bool:

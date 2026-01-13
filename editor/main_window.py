@@ -15,6 +15,7 @@ from PySide6.QtCore import Qt
 from editor.document import Document
 from editor.split_container import SplitContainer
 from editor.file_handler import FileHandler
+from editor.theme_manager import ThemeManager, Theme
 
 
 class MainWindow(QMainWindow):
@@ -25,8 +26,10 @@ class MainWindow(QMainWindow):
         
         self._file_handler = FileHandler()
         self._word_wrap_enabled = True
+        self._theme_manager = ThemeManager()
         
         self._setup_ui()
+        self._theme_manager.apply_theme(Theme.DARK)
         self._setup_menus()
         self._setup_status_bar()
         self._connect_signals()
@@ -143,6 +146,22 @@ class MainWindow(QMainWindow):
         self._status_bar_action.setChecked(True)
         self._status_bar_action.triggered.connect(self._on_toggle_status_bar)
         view_menu.addAction(self._status_bar_action)
+        
+        view_menu.addSeparator()
+        
+        themes_menu = view_menu.addMenu("&Themes")
+        
+        self._dark_theme_action = QAction("&Dark", self)
+        self._dark_theme_action.setCheckable(True)
+        self._dark_theme_action.setChecked(True)
+        self._dark_theme_action.triggered.connect(lambda: self._on_theme_changed(Theme.DARK))
+        themes_menu.addAction(self._dark_theme_action)
+        
+        self._light_theme_action = QAction("&Light", self)
+        self._light_theme_action.setCheckable(True)
+        self._light_theme_action.setChecked(False)
+        self._light_theme_action.triggered.connect(lambda: self._on_theme_changed(Theme.LIGHT))
+        themes_menu.addAction(self._light_theme_action)
         
         view_menu.addSeparator()
         
@@ -481,6 +500,12 @@ class MainWindow(QMainWindow):
     def _on_toggle_status_bar(self, checked: bool):
         """Handle View > Status Bar toggle."""
         self._status_bar.setVisible(checked)
+    
+    def _on_theme_changed(self, theme: Theme):
+        """Handle theme selection."""
+        self._theme_manager.apply_theme(theme)
+        self._dark_theme_action.setChecked(theme == Theme.DARK)
+        self._light_theme_action.setChecked(theme == Theme.LIGHT)
     
     def _on_swap_panes(self):
         """Handle View > Swap Split Panes."""

@@ -187,6 +187,7 @@ class EditorPane(QWidget):
         if document in self._documents:
             index = self._documents.index(document)
             self._tab_bar.setTabText(index, document.display_name)
+            self._tab_bar.setTabModified(index, document.is_modified)
     
     def set_word_wrap(self, enabled: bool):
         """Toggle word wrap on the editor."""
