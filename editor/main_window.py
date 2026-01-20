@@ -7,7 +7,7 @@ Implements the main application window with menus, status bar, and split contain
 from typing import Optional
 from PySide6.QtWidgets import (
     QMainWindow, QMenuBar, QStatusBar, QMessageBox,
-    QFileDialog, QLabel
+    QFileDialog, QLabel, QSplitter
 )
 from PySide6.QtGui import QAction, QKeySequence
 from PySide6.QtCore import Qt
@@ -16,6 +16,7 @@ from editor.document import Document
 from editor.split_container import SplitContainer
 from editor.file_handler import FileHandler
 from editor.theme_manager import ThemeManager, Theme
+from editor.file_tree import FileTree, CollapsibleSidebar
 
 
 class MainWindow(QMainWindow):
@@ -42,8 +43,25 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("TextEdit")
         self.setMinimumSize(800, 600)
         
+        self._main_splitter = QSplitter(Qt.Orientation.Horizontal, self)
+        
+        self._sidebar = CollapsibleSidebar(self)
+        self._file_tree = FileTree(self)
+        self._sidebar.set_content(self._file_tree)
+        self._sidebar.setVisible(False)
+        self._main_splitter.addWidget(self._sidebar)
+        
         self._split_container = SplitContainer(self)
-        self.setCentralWidget(self._split_container)
+        self._main_splitter.addWidget(self._split_container)
+        
+        self._main_splitter.setStretchFactor(0, 0)
+        self._main_splitter.setStretchFactor(1, 1)
+        self._main_splitter.setSizes([200, 600])
+        
+        self.setCentralWidget(self._main_splitter)
+        
+        self._file_tree.file_open_requested.connect(self._on_file_tree_open)
+        self._file_tree.file_open_new_tab_requested.connect(self._on_file_tree_open_new_tab)
     
     def _setup_menus(self):
         """Create the menu bar and all menus."""
@@ -67,6 +85,11 @@ class MainWindow(QMainWindow):
         open_action.setShortcut(QKeySequence.StandardKey.Open)
         open_action.triggered.connect(self._on_open)
         file_menu.addAction(open_action)
+        
+        open_folder_action = QAction("Open &Folder...", self)
+        open_folder_action.setShortcut(QKeySequence("Ctrl+Shift+O"))
+        open_folder_action.triggered.connect(self._on_open_folder)
+        file_menu.addAction(open_folder_action)
         
         file_menu.addSeparator()
         
@@ -135,6 +158,13 @@ class MainWindow(QMainWindow):
     def _setup_view_menu(self, menubar: QMenuBar):
         """Create the View menu."""
         view_menu = menubar.addMenu("&View")
+        
+        self._sidebar_action = QAction("&Sidebar", self)
+        self._sidebar_action.setCheckable(True)
+        self._sidebar_action.setChecked(False)
+        self._sidebar_action.setShortcut(QKeySequence("Ctrl+B"))
+        self._sidebar_action.triggered.connect(self._on_toggle_sidebar)
+        view_menu.addAction(self._sidebar_action)
         
         self._word_wrap_action = QAction("&Word Wrap", self)
         self._word_wrap_action.setCheckable(True)
@@ -520,6 +550,57 @@ class MainWindow(QMainWindow):
     def _on_toggle_status_bar(self, checked: bool):
         """Handle View > Status Bar toggle."""
         self._status_bar.setVisible(checked)
+    
+    def _on_toggle_sidebar(self, checked: bool):
+        """Handle View > Sidebar toggle."""
+        self._sidebar.setVisible(checked)
+    
+    def _on_open_folder(self):
+        """Handle File > Open Folder action."""
+        import os
+        folder_path = QFileDialog.getExistingDirectory(
+            self,
+            "Open Folder",
+            os.path.expanduser("~"),
+            QFileDialog.Option.ShowDirsOnly
+        )
+        
+        if folder_path:
+            self._file_tree.open_folder(folder_path)
+            self._sidebar.setVisible(True)
+            self._sidebar.set_collapsed(False)
+            self._sidebar_action.setChecked(True)
+    
+    def _on_file_tree_open(self, file_path: str):
+        """Handle file open request from file tree."""
+        self._open_file(file_path)
+    
+    def _on_file_tree_open_new_tab(self, file_path: str):
+        """Handle file open in new tab request from file tree (middle click)."""
+        self._open_file(file_path, force_new_tab=True)
+    
+    def _open_file(self, file_path: str, force_new_tab: bool = False):
+        """Open a file in the editor."""
+        result = self._file_handler.read_file(file_path)
+        
+        if result.success:
+            doc = Document(content=result.content, file_path=file_path)
+            
+            if not force_new_tab:
+                current_doc = self._split_container.active_document
+                pane = self._split_container.active_pane
+                
+                if (current_doc and pane and
+                    current_doc.file_path is None and
+                    not current_doc.is_modified and
+                    current_doc.content == ""):
+                    pane.remove_document(current_doc)
+            
+            self._split_container.add_document(doc)
+            self._update_window_title()
+            self._update_status_bar()
+        else:
+            self._show_error("Open Error", result.error_message)
     
     def _on_theme_changed(self, theme: Theme):
         """Handle theme selection."""

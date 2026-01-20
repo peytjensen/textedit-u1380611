@@ -262,6 +262,39 @@ QSplitter::handle:vertical {
 QSplitter::handle:hover {
     background-color: #0078d4;
 }
+
+QTreeView {
+    background-color: #252526;
+    color: #cccccc;
+    border: none;
+    outline: none;
+}
+
+QTreeView::item {
+    padding: 4px 8px;
+    border-radius: 4px;
+}
+
+QTreeView::item:hover {
+    background-color: #2a2d2e;
+}
+
+QTreeView::item:selected {
+    background-color: #094771;
+    color: #ffffff;
+}
+
+QTreeView::branch:has-children:!has-siblings:closed,
+QTreeView::branch:closed:has-children:has-siblings {
+    image: none;
+    border-image: none;
+}
+
+QTreeView::branch:open:has-children:!has-siblings,
+QTreeView::branch:open:has-children:has-siblings {
+    image: none;
+    border-image: none;
+}
 """
 
 LIGHT_STYLESHEET = """
@@ -509,6 +542,39 @@ QSplitter::handle:vertical {
 
 QSplitter::handle:hover {
     background-color: #0078d4;
+}
+
+QTreeView {
+    background-color: #f3f3f3;
+    color: #333333;
+    border: none;
+    outline: none;
+}
+
+QTreeView::item {
+    padding: 4px 8px;
+    border-radius: 4px;
+}
+
+QTreeView::item:hover {
+    background-color: #e8e8e8;
+}
+
+QTreeView::item:selected {
+    background-color: #0078d4;
+    color: #ffffff;
+}
+
+QTreeView::branch:has-children:!has-siblings:closed,
+QTreeView::branch:closed:has-children:has-siblings {
+    image: none;
+    border-image: none;
+}
+
+QTreeView::branch:open:has-children:!has-siblings,
+QTreeView::branch:open:has-children:has-siblings {
+    image: none;
+    border-image: none;
 }
 """
 
@@ -760,6 +826,39 @@ QSplitter::handle:vertical {
 QSplitter::handle:hover {
     background-color: #40e0d0;
 }
+
+QTreeView {
+    background-color: #1a2f2f;
+    color: #e0f0f0;
+    border: none;
+    outline: none;
+}
+
+QTreeView::item {
+    padding: 4px 8px;
+    border-radius: 4px;
+}
+
+QTreeView::item:hover {
+    background-color: #243d3d;
+}
+
+QTreeView::item:selected {
+    background-color: #2d5a5a;
+    color: #40e0d0;
+}
+
+QTreeView::branch:has-children:!has-siblings:closed,
+QTreeView::branch:closed:has-children:has-siblings {
+    image: none;
+    border-image: none;
+}
+
+QTreeView::branch:open:has-children:!has-siblings,
+QTreeView::branch:open:has-children:has-siblings {
+    image: none;
+    border-image: none;
+}
 """
 
 MIDNIGHT_BLUE_STYLESHEET = """
@@ -1008,6 +1107,39 @@ QSplitter::handle:vertical {
 
 QSplitter::handle:hover {
     background-color: #58a6ff;
+}
+
+QTreeView {
+    background-color: #0d1117;
+    color: #c9d1d9;
+    border: none;
+    outline: none;
+}
+
+QTreeView::item {
+    padding: 4px 8px;
+    border-radius: 4px;
+}
+
+QTreeView::item:hover {
+    background-color: #161b22;
+}
+
+QTreeView::item:selected {
+    background-color: #1f6feb;
+    color: #ffffff;
+}
+
+QTreeView::branch:has-children:!has-siblings:closed,
+QTreeView::branch:closed:has-children:has-siblings {
+    image: none;
+    border-image: none;
+}
+
+QTreeView::branch:open:has-children:!has-siblings,
+QTreeView::branch:open:has-children:has-siblings {
+    image: none;
+    border-image: none;
 }
 """
 
