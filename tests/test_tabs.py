@@ -8,6 +8,7 @@ from PySide6.QtWidgets import QApplication
 from editor.document import Document
 from editor.editor_pane import EditorPane
 from editor.split_container import SplitContainer
+from editor.theme_manager import ThemeManager, Theme
 
 
 @pytest.fixture(scope="session")
@@ -299,3 +300,39 @@ class TestSwapPanes:
         pane_before = container._panes[0]
         container.swap_panes()
         assert container._panes[0] == pane_before
+
+
+class TestSplitLineNumberColors:
+    """Tests for line number colors in split panes."""
+    
+    def test_split_pane_gets_theme_colors(self, container):
+        """New pane from split gets current theme line number colors."""
+        ThemeManager().apply_theme(Theme.AQUAMARINE)
+        
+        container.add_new_document()
+        doc = container.active_document
+        container.create_split(doc, "right")
+        
+        new_pane = container.active_pane
+        editor = new_pane._editor
+        
+        expected_colors = ThemeManager().get_line_number_colors()
+        from PySide6.QtGui import QColor
+        assert editor._bg_color == QColor(expected_colors["bg"])
+        assert editor._text_color == QColor(expected_colors["text"])
+        assert editor._current_line_color == QColor(expected_colors["current_line"])
+    
+    def test_split_pane_colors_for_midnight_blue(self, container):
+        """New pane from split gets midnight blue theme colors."""
+        ThemeManager().apply_theme(Theme.MIDNIGHT_BLUE)
+        
+        container.add_new_document()
+        doc = container.active_document
+        container.create_split(doc, "right")
+        
+        new_pane = container.active_pane
+        editor = new_pane._editor
+        
+        expected_colors = ThemeManager().get_line_number_colors()
+        from PySide6.QtGui import QColor
+        assert editor._bg_color == QColor(expected_colors["bg"])

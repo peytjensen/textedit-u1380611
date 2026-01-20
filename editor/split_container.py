@@ -13,6 +13,7 @@ from editor.document import Document
 from editor.editor_pane import EditorPane
 from editor.tab_bar import EditorTabBar
 from editor.file_handler import FileHandler
+from editor.theme_manager import ThemeManager
 
 
 class SplitContainer(QWidget):
@@ -187,6 +188,14 @@ class SplitContainer(QWidget):
         new_pane.add_document(document)
         self._active_pane = new_pane
         new_pane.focus_editor()
+        
+        colors = ThemeManager().get_line_number_colors()
+        new_pane.set_line_number_colors(
+            colors["bg"],
+            colors["text"],
+            colors["current_line"],
+            colors["current_line_bg"]
+        )
         
         sizes = [self.width() // 2, self.width() // 2]
         self._splitter.setSizes(sizes)
