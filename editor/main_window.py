@@ -433,7 +433,14 @@ class MainWindow(QMainWindow):
         result = self._file_handler.read_file(file_path)
         
         if result.success:
-            doc = Document(content=result.content, file_path=file_path)
+            content = result.content
+            is_html = content.strip().startswith('<!DOCTYPE') or content.strip().startswith('<html')
+            
+            if is_html:
+                doc = Document(content="", file_path=file_path)
+                doc.html_content = content
+            else:
+                doc = Document(content=content, file_path=file_path)
             
             current_doc = self._split_container.active_document
             pane = self._split_container.active_pane
@@ -496,7 +503,8 @@ class MainWindow(QMainWindow):
         if not path:
             return False
         
-        result = self._file_handler.write_file(path, document.content)
+        content_to_save = document.html_content if document.html_content else document.content
+        result = self._file_handler.write_file(path, content_to_save)
         
         if result.success:
             document.mark_saved(path)
@@ -639,7 +647,14 @@ class MainWindow(QMainWindow):
         result = self._file_handler.read_file(file_path)
         
         if result.success:
-            doc = Document(content=result.content, file_path=file_path)
+            content = result.content
+            is_html = content.strip().startswith('<!DOCTYPE') or content.strip().startswith('<html')
+            
+            if is_html:
+                doc = Document(content="", file_path=file_path)
+                doc.html_content = content
+            else:
+                doc = Document(content=content, file_path=file_path)
             
             if not force_new_tab:
                 current_doc = self._split_container.active_document

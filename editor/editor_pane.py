@@ -287,7 +287,8 @@ class EditorPane(QWidget):
         """Save a document to disk."""
         if document.file_path:
             self._save_current_state()
-            result = self._file_handler.write_file(document.file_path, document.content)
+            content_to_save = document.html_content if document.html_content else document.content
+            result = self._file_handler.write_file(document.file_path, content_to_save)
             if result.success:
                 document.mark_saved()
                 self.update_tab_title(document)

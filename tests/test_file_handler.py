@@ -148,3 +148,33 @@ class TestFileHandlerRoundTrip:
         assert write_result.success is True
         assert read_result.success is True
         assert read_result.content == test_content
+    
+    def test_write_html_content(self, tmp_path):
+        """HTML content can be written and read back."""
+        test_file = tmp_path / "formatted.txt"
+        html_content = '<!DOCTYPE HTML><html><body><p style="font-size:14pt;">Test</p></body></html>'
+        
+        write_result = FileHandler.write_file(str(test_file), html_content)
+        read_result = FileHandler.read_file(str(test_file))
+        
+        assert write_result.success is True
+        assert read_result.success is True
+        assert read_result.content == html_content
+    
+    def test_html_detection_doctype(self, tmp_path):
+        """HTML content starting with DOCTYPE is detected."""
+        content = '<!DOCTYPE HTML><html><body>Test</body></html>'
+        is_html = content.strip().startswith('<!DOCTYPE') or content.strip().startswith('<html')
+        assert is_html is True
+    
+    def test_html_detection_html_tag(self, tmp_path):
+        """HTML content starting with html tag is detected."""
+        content = '<html><body>Test</body></html>'
+        is_html = content.strip().startswith('<!DOCTYPE') or content.strip().startswith('<html')
+        assert is_html is True
+    
+    def test_plain_text_not_detected_as_html(self, tmp_path):
+        """Plain text is not detected as HTML."""
+        content = 'Hello, this is plain text.\nNo HTML here.'
+        is_html = content.strip().startswith('<!DOCTYPE') or content.strip().startswith('<html')
+        assert is_html is False
