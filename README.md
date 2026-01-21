@@ -1,5 +1,23 @@
 <h1>textedit-u1380611</h1>
 
+## Quick Start
+
+```bash
+# Clone the repository
+git clone https://github.com/peytjensen/textedit-u1380611.git
+cd textedit-u1380611
+
+# Create and activate virtual environment
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Run the application
+python textedit.py
+```
+
 <p><h2>R1</h2></p>
 <p>
 For this first release, I successfully implemented all the basics such as text editing, selection, keyboard shortcuts, and a menu bar. My approach was to ask ChatGPT to break down the entire control flow of Microsoft Notepad into simple actions such as File > Save as > File explorer popup. This worked incredibly well and I had all of these basics implemented in less than 3 prompts. I also have implemented an unsaved changes popup when closing a file you have modified and I have started on tabs/split view, although that feature won't be ready till next release.
