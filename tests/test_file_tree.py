@@ -104,6 +104,17 @@ class TestFileTreeOpenFolder:
             assert tree.root_path is None
             assert not tree._close_folder_action.isEnabled()
         tree.deleteLater()
+    
+    def test_close_folder_defaults_to_home_directory(self, qapp):
+        """When a folder is closed, it defaults to the user's home directory."""
+        tree = FileTree()
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tree.open_folder(tmpdir)
+            tree.close_folder()
+            # After closing, the tree should display the home directory
+            home_dir = os.path.expanduser("~")
+            assert tree._model.rootPath() == home_dir
+        tree.deleteLater()
 
 
 class TestFileTreeRefresh:

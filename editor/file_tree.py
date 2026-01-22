@@ -250,8 +250,9 @@ class FileTree(QWidget):
     def close_folder(self):
         """Close the currently open folder."""
         self._root_path = None
-        self._model.setRootPath("")
-        self._tree_view.setRootIndex(QModelIndex())
+        home_dir = os.path.expanduser("~")
+        self._model.setRootPath(home_dir)
+        self._tree_view.setRootIndex(self._model.index(home_dir))
         self._close_folder_action.setEnabled(False)
     
     def refresh(self):

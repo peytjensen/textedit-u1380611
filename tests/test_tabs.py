@@ -336,3 +336,86 @@ class TestSplitLineNumberColors:
         expected_colors = ThemeManager().get_line_number_colors()
         from PySide6.QtGui import QColor
         assert editor._bg_color == QColor(expected_colors["bg"])
+
+
+class TestUndoRedoModifiedState:
+    """Tests for undo/redo affecting is_modified state."""
+    
+    def test_undo_reverts_modified_state(self, pane):
+        """Undoing all changes sets is_modified back to false."""
+        doc = pane.add_new_document()
+        
+        # Start clean
+        assert doc.is_modified is False
+        
+        # Add some text
+        pane._editor.insertPlainText("Hello, World!")
+        assert doc.is_modified is True
+        
+        # Undo the change
+        pane._editor.undo()
+        assert doc.is_modified is False
+    
+    def test_redo_marks_as_modified(self, pane):
+        """Redoing changes sets is_modified back to true."""
+        doc = pane.add_new_document()
+        
+        # Add and undo
+        pane._editor.insertPlainText("Hello")
+        pane._editor.undo()
+        assert doc.is_modified is False
+        
+        # Redo
+        pane._editor.redo()
+        assert doc.is_modified is True
+    
+    def test_multiple_changes_then_undo_all(self, pane):
+        """Multiple changes can be undone back to clean state."""
+        doc = pane.add_new_document()
+        
+        pane._editor.insertPlainText("Line 1\n")
+        assert doc.is_modified is True
+        
+        pane._editor.insertPlainText("Line 2")
+        assert doc.is_modified is True
+        
+        # Undo both changes
+        pane._editor.undo()
+        pane._editor.undo()
+        assert doc.is_modified is False
+    
+    def test_tab_indicator_updates_on_undo(self, pane):
+        """Tab modification indicator updates when undoing."""
+        doc = pane.add_new_document()
+        
+        pane._editor.insertPlainText("Test")
+        pane.update_tab_title(doc)
+        # Check that the tab shows modified state
+        assert doc.is_modified is True
+        
+        pane._editor.undo()
+        # After undo, is_modified should be False
+        assert doc.is_modified is False
+        pane.update_tab_title(doc)
+        # Tab bar should now show the document as unmodified
+        assert doc.is_modified is False
+    
+    def test_restored_doc_tracks_undo_state_correctly(self, pane):
+        """Undoing changes on a document updates is_modified correctly."""
+        doc = pane.add_new_document()
+        
+        # Add text
+        pane._editor.insertPlainText("Content")
+        assert doc.is_modified is True
+        
+        # Mark as saved to reset is_modified
+        doc.mark_saved()
+        assert doc.is_modified is False
+        
+        # Add more text
+        pane._editor.insertPlainText(" more")
+        assert doc.is_modified is True
+        
+        # Undo should revert to saved state
+        pane._editor.undo()
+        assert doc.is_modified is False

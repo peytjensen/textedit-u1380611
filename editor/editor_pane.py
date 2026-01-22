@@ -55,6 +55,7 @@ class EditorPane(QWidget):
         
         self._editor.textChanged.connect(self._on_text_changed)
         self._editor.cursorPositionChanged.connect(self._on_cursor_changed)
+        self._editor.document().modificationChanged.connect(self._on_modification_changed)
     
     def _connect_signals(self):
         """Connect tab bar signals."""
@@ -225,7 +226,9 @@ class EditorPane(QWidget):
     
     def _restore_document_state(self, document: Document):
         """Restore editor state from a document."""
+        # Block all signals during restoration to prevent spurious modification state changes
         self._editor.blockSignals(True)
+        self._editor.document().blockSignals(True)
         
         if document.html_content:
             self._editor.document().setHtml(document.html_content)
@@ -247,6 +250,15 @@ class EditorPane(QWidget):
         self._editor.horizontalScrollBar().setValue(document.scroll_position[0])
         self._editor.verticalScrollBar().setValue(document.scroll_position[1])
         
+        # Clear undo/redo stacks to establish a clean "saved" state.
+        # After this, undoing back to the current state will not mark as modified.
+        self._editor.document().clearUndoRedoStacks()
+        
+        # Sync Qt's modification state with our document model
+        # This ensures undo/redo tracks the "saved" state correctly
+        self._editor.document().setModified(document.is_modified)
+        
+        self._editor.document().blockSignals(False)
         self._editor.blockSignals(False)
     
     def _on_tab_changed(self, index: int):
@@ -270,6 +282,11 @@ class EditorPane(QWidget):
         if doc is None:
             return
         
+        # Don't set modified=True if Qt's internal modification flag is False
+        # (this happens during undo/redo back to clean state)
+        if not self._editor.document().isModified():
+            return
+        
         if not doc.is_modified:
             doc.is_modified = True
             self.update_tab_title(doc)
@@ -278,6 +295,20 @@ class EditorPane(QWidget):
     def _on_cursor_changed(self):
         """Handle cursor position changes."""
         pass
+    
+    def _on_modification_changed(self, is_modified: bool):
+        """Handle document modification state changes from Qt's undo/redo system.
+        
+        When undo/redo brings the document back to its saved state,
+        Qt's modificationChanged signal fires with is_modified=False.
+        """
+        doc = self.current_document
+        if doc is None:
+            return
+        
+        doc.is_modified = is_modified
+        self.update_tab_title(doc)
+        self.document_modified.emit(doc, is_modified)
     
     def _on_tab_close_requested(self, index: int):
         """Handle tab close request - forward to container for proper handling."""
