@@ -33,3 +33,14 @@ This week I added and refined the tabs system and split view, along with adding 
 </p>
 <img width="400" height="350" alt="image" src="https://github.com/user-attachments/assets/a253552e-6e1c-432f-8024-7a76fbd8ef8c" />
 
+<p><h2>R3</h2></p>
+<p>
+For this final week, I have implented a theme and font editor pane where you can create and save new custom themes, along with apply fonts to a full document or selected text. I also added a floating toolbar, similar to Microsoft Word, where when you select text you can change the font and size inline. I am proud of this feature because it works very well and I had to do a lot of adaptation to get the text size to work on my system. I am using hyprland on linux which is built on the wayland protocol, this protocol handles window focus differently than most, and it took a lot to get it so that you can actually type in the font size box (rather than behind it). I also added a file tree explorer for an extra feature, it is accessed by selecting "open folder". It works pretty well, and allows for the opening of files in new tabs. One thing I could not get to work perfectly for this is making the collapsing smoother, you can collapse and hide it, it's just pretty clunky. Finally, I added unit tests for all of these new functions, and they all are working. The AGENTS.md file has been extremely useful, as AMP will always write tests and squash bugs before reporting back to me. 
+</p>
+<img width="405" height="320" alt="image" src="https://github.com/user-attachments/assets/eaee89a5-d3cb-4cc4-8bbb-9cceb5c4254c" />
+<img width="305" height="320" alt="image" src="https://github.com/user-attachments/assets/3ae58e0b-f0ce-4c42-bd66-e6614e1ee963" />
+<img width="730" height="360" alt="image" src="https://github.com/user-attachments/assets/01cf943e-438d-4f65-9643-14d0ca13ec74" />
+<img width="650" height="500" alt="image" src="https://github.com/user-attachments/assets/d53fedec-a01c-4ee3-b847-5190f1e3fe4a" />
+
+
+
